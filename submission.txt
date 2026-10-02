@@ -10,3 +10,7 @@ coverage report
 
 # Url Google Sheets:
 https://docs.google.com/spreadsheets/d/1X683BhBBnKemrD-P5opO4g0QPMybhZqtGPEbBSHoPjI/edit?usp=sharing
+
+# Catatan untuk reviewer
+# Jika ingin mencoba postgre cukup isi data didalam file .env.example
+

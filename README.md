@@ -1,7 +1,9 @@
 # Dicoding - Belajar Fundamental Pemrosesan Data
 
 ## Penilaian Proyek
-Proyek ini merupakan submission akhir untuk kelas Dicoding **Belajar Fundamental Pemrosesan Data (BFPD)** yang dirancang untuk meraih predikat tertinggi **Bintang 5 / Advanced (4.0 Poin)**.
+Proyek ini merupakan submission akhir untuk kelas Dicoding **Belajar Fundamental Pemrosesan Data (BFPD)** yang berhasil meraih predikat tertinggi **Bintang 5 / Advanced (4.0 Poin)**.
+
+![Bukti Penilaian Bintang 5](readme/nilai.png)
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![pandas 2.2.x](https://img.shields.io/badge/pandas-2.2.x-orange.svg)](https://pandas.pydata.org/)
@@ -47,21 +49,18 @@ Dicoding-BelajarFundamentalPemrosesanData/
 ├── requirements.txt            # Dependensi pustaka Python
 ├── submission.txt              # Berkas petunjuk eksekusi submission untuk reviewer
 ├── products.csv                # Data hasil akhir pembersihan (867 baris x 7 atribut)
+├── .env.example                # Templat konfigurasi lingkungan (Google Sheets & DB)
 ├── README.md                   # Dokumentasi lengkap proyek
+├── readme/
+│   └── nilai.png               # Bukti penilaian bintang 5 submission Dicoding
 ├── utils/                      # Modul modular kode ETL
-│   ├── __init__.py             # Inisialisasi package utils
 │   ├── extract.py              # Logika web scraping 50 halaman + timestamp
 │   ├── transform.py            # Pembersihan, filtering data invalid, konversi kurs
 │   └── load.py                 # Pemuatan data ke CSV, Google Sheets, & PostgreSQL
-├── tests/                      # Rangkaian pengujian unit test otomatis
-│   ├── __init__.py             # Inisialisasi package tests
-│   ├── test_extract.py         # Unit test modul ekstraksi (HTTP mocking & parsing)
-│   ├── test_transform.py       # Unit test modul transformasi & konversi tipe
-│   └── test_load.py            # Unit test modul pemuatan (CSV, Sheets API, DB mock)
-└── ai-agent/                   # Dokumen referensi dan instruksi submission
-    ├── instruksi_submission.md # Panduan submission yang telah dirapikan (5 section)
-    ├── contoh-readme.md        # Templat acuan dokumentasi proyek
-    └── menyimpan_data_ke_googlesheet.md # Panduan integrasi Google Sheets API
+└── tests/                      # Rangkaian pengujian unit test otomatis
+    ├── test_extract.py         # Unit test modul ekstraksi (HTTP mocking & parsing)
+    ├── test_transform.py       # Unit test modul transformasi & konversi tipe
+    └── test_load.py            # Unit test modul pemuatan (CSV, Sheets API, DB mock)
 ```
 
 ---
