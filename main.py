@@ -1,11 +1,3 @@
-"""
-Main Entry Point untuk ETL Pipeline Fashion Studio.
-Mengorkestrasi seluruh tahapan:
-1. Extract   : Web scraping 50 halaman produk dari https://fashion-studio.dicoding.dev
-2. Transform : Pembersihan data, validasi format, konversi kurs, dan filtering
-3. Load      : Pemuatan data ke CSV, Google Sheets, dan database PostgreSQL
-"""
-
 import sys
 import logging
 import os
@@ -56,21 +48,6 @@ def run_pipeline(
     spreadsheet_id: str | None = None,
     postgres_conn_string: str | None = None,
 ) -> Dict[str, Any]:
-    """
-    Menjalankan alur ETL Pipeline secara terpadu.
-
-    Args:
-        base_url: URL dasar target scraping.
-        total_pages: Jumlah halaman yang diekstrak (50 halaman).
-        exchange_rate: Nilai konversi USD ke IDR.
-        output_csv_path: Path berkas output CSV.
-        service_account_path: Path berkas service account JSON.
-        spreadsheet_id: ID Google Sheets tujuan.
-        postgres_conn_string: URI koneksi database PostgreSQL.
-
-    Returns:
-        Dictionary ringkasan eksekusi pipeline.
-    """
     summary: Dict[str, Any] = {
         "status": "failed",
         "extracted_rows": 0,
