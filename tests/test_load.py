@@ -1,12 +1,3 @@
-"""
-Unit tests untuk modul utils/load.py
-Menguji fungsi:
-- load_to_csv
-- load_to_google_sheets
-- load_to_postgres
-- load_data
-"""
-
 import os
 import unittest
 from unittest.mock import MagicMock, patch
@@ -37,15 +28,11 @@ class TestLoad(unittest.TestCase):
         if os.path.exists(self.temp_csv):
             os.remove(self.temp_csv)
 
-    # -----------------------------------------------------------------
-    # Test load_to_csv
-    # -----------------------------------------------------------------
     def test_load_to_csv_success(self):
         output_file = load_to_csv(self.sample_df, output_path=self.temp_csv)
         self.assertEqual(output_file, self.temp_csv)
         self.assertTrue(os.path.exists(self.temp_csv))
 
-        # Verifikasi konten
         read_df = pd.read_csv(self.temp_csv)
         self.assertEqual(len(read_df), 2)
         self.assertEqual(read_df.loc[0, "Title"], "T-shirt 2")
@@ -59,9 +46,6 @@ class TestLoad(unittest.TestCase):
         with self.assertRaises(IOError):
             load_to_csv(self.sample_df, output_path=self.temp_csv)
 
-    # -----------------------------------------------------------------
-    # Test load_to_google_sheets
-    # -----------------------------------------------------------------
     def test_load_to_google_sheets_none_df(self):
         result = load_to_google_sheets(None)
         self.assertFalse(result)
@@ -121,9 +105,6 @@ class TestLoad(unittest.TestCase):
         )
         self.assertFalse(result)
 
-    # -----------------------------------------------------------------
-    # Test load_to_postgres
-    # -----------------------------------------------------------------
     def test_load_to_postgres_none_df(self):
         result = load_to_postgres(None)
         self.assertFalse(result)
@@ -165,9 +146,6 @@ class TestLoad(unittest.TestCase):
         )
         self.assertFalse(result)
 
-    # -----------------------------------------------------------------
-    # Test load_data orchestrator
-    # -----------------------------------------------------------------
     @patch("utils.load.load_to_csv", return_value="products.csv")
     @patch("utils.load.load_to_google_sheets", return_value=True)
     @patch("utils.load.load_to_postgres", return_value=True)
@@ -187,7 +165,6 @@ class TestLoad(unittest.TestCase):
         self.assertFalse(results["csv"])
 
     def test_load_data_general_exception(self):
-        # Passing an invalid type that breaks tuple/list iteration
         results = load_data(self.sample_df, targets=None)
         self.assertEqual(results, {})
 

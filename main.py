@@ -3,7 +3,6 @@ import logging
 import os
 from typing import Dict, Any
 
-# Muat variabel lingkungan dari .env jika tersedia
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -25,7 +24,6 @@ DEFAULT_SPREADSHEET_ID = "1X683BhBBnKemrD-P5opO4g0QPMybhZqtGPEbBSHoPjI"
 
 
 def get_spreadsheet_id_from_submission(file_path: str = "submission.txt") -> str | None:
-    """Membaca spreadsheet ID dari berkas submission.txt jika tersedia."""
     try:
         if os.path.exists(file_path):
             import re
@@ -60,9 +58,6 @@ def run_pipeline(
         logger.info("   MEMULAI ETL PIPELINE - FASHION STUDIO DATA PROCESSING   ")
         logger.info("=" * 60)
 
-        # -----------------------------
-        # 1. TAHAP EKSTRAKSI (EXTRACT)
-        # -----------------------------
         logger.info(f"[TAHAP 1] Ekstraksi data dari {base_url} ({total_pages} halaman)...")
         raw_df = extract_data(base_url=base_url, total_pages=total_pages)
         summary["extracted_rows"] = len(raw_df)
@@ -73,9 +68,6 @@ def run_pipeline(
 
         logger.info(f"Ekstraksi selesai: Berhasil mengumpulkan {len(raw_df)} baris data mentah.")
 
-        # --------------------------------
-        # 2. TAHAP TRANSFORMASI (TRANSFORM)
-        # --------------------------------
         logger.info("[TAHAP 2] Transformasi dan pembersihan data...")
         clean_df = transform_data(raw_df, exchange_rate=exchange_rate)
         summary["transformed_rows"] = len(clean_df)
@@ -89,13 +81,9 @@ def run_pipeline(
         for col, dtype in clean_df.dtypes.items():
             logger.info(f"  - {col}: {dtype}")
 
-        # -----------------------------
-        # 3. TAHAP PEMUATAN (LOAD)
-        # -----------------------------
         logger.info("[TAHAP 3] Pemuatan data ke repositori data...")
         load_targets = ["csv"]
 
-        # Tentukan target repositori tambahan berdasarkan ketersediaan konfigurasi
         target_sheet_id = spreadsheet_id or os.getenv("SPREADSHEET_ID") or get_spreadsheet_id_from_submission()
         if target_sheet_id and os.path.exists(service_account_path):
             load_targets.append("google_sheets")
@@ -107,7 +95,6 @@ def run_pipeline(
         if db_conn or os.getenv("POSTGRES_DB"):
             load_targets.append("postgres")
         else:
-            # Tetap coba postgres dengan default jika database aktif
             load_targets.append("postgres")
 
         load_results = load_data(
@@ -137,7 +124,6 @@ def run_pipeline(
 
 
 def main():
-    """Fungsi utama eksekutor program."""
     try:
         result = run_pipeline()
         if result.get("status") == "success":

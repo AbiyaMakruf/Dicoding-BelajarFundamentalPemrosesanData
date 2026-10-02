@@ -1,8 +1,3 @@
-"""
-Modul Extract untuk ETL Pipeline Fashion Studio.
-Bertanggung jawab untuk mengambil data produk dari website target melalui web scraping.
-"""
-
 import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -15,17 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 def fetch_page(url: str, session: Optional[requests.Session] = None, timeout: int = 15) -> Optional[str]:
-    """
-    Mengambil isi konten HTML dari URL yang diberikan.
-
-    Args:
-        url: Alamat URL halaman website yang akan diambil.
-        session: Sesi requests opsional untuk koneksi yang efisien.
-        timeout: Batas waktu permintaan dalam detik.
-
-    Returns:
-        String HTML jika berhasil, None jika terjadi kegagalan.
-    """
     try:
         requester = session if session is not None else requests
         headers = {
@@ -47,25 +31,13 @@ def fetch_page(url: str, session: Optional[requests.Session] = None, timeout: in
 
 
 def parse_product_card(card: Any, timestamp: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    """
-    Mem-parsing satu kartu elemen produk HTML (div.collection-card) menjadi kamus data mentah.
-
-    Args:
-        card: Objek tag BeautifulSoup untuk satu kartu produk.
-        timestamp: String penanda waktu pengambilan data.
-
-    Returns:
-        Dictionary berisi atribut Title, Price, Rating, Colors, Size, Gender, timestamp.
-    """
     try:
         if card is None:
             return None
 
-        # Title
         title_el = card.find(class_="product-title")
         title = title_el.text.strip() if title_el and title_el.text else None
 
-        # Price
         price_el = card.find(class_="price")
         price_unavail = card.find(class_=lambda x: x and "unavail" in x.lower())
         if price_el and price_el.text:
@@ -75,7 +47,6 @@ def parse_product_card(card: Any, timestamp: Optional[str] = None) -> Optional[D
         else:
             price_text = None
 
-        # Atribut lainnya dari tag <p>
         paras = [p.text.strip() for p in card.find_all("p") if p.text]
         rating_text = None
         colors_text = None
@@ -113,17 +84,6 @@ def scrape_page(
     session: Optional[requests.Session] = None,
     base_url: str = "https://fashion-studio.dicoding.dev",
 ) -> List[Dict[str, Any]]:
-    """
-    Mengambil dan mem-parsing seluruh produk dari satu nomor halaman tertentu.
-
-    Args:
-        page_number: Nomor halaman yang akan di-scrape (1..50).
-        session: Sesi requests opsional.
-        base_url: URL dasar situs website.
-
-    Returns:
-        List of dictionaries berisi data produk pada halaman tersebut.
-    """
     try:
         if page_number < 1:
             logger.warning(f"Nomor halaman {page_number} tidak valid. Harus >= 1.")
@@ -159,17 +119,6 @@ def extract_data(
     total_pages: int = 50,
     session: Optional[requests.Session] = None,
 ) -> pd.DataFrame:
-    """
-    Menjalankan proses ekstraksi secara menyeluruh dari halaman 1 hingga total_pages (50 halaman).
-
-    Args:
-        base_url: URL dasar situs website.
-        total_pages: Jumlah total halaman yang diekstrak (default: 50).
-        session: Sesi requests opsional.
-
-    Returns:
-        DataFrame Pandas berisi 1000 data mentah hasil scraping beserta kolom timestamp.
-    """
     try:
         logger.info(f"Memulai proses ekstraksi data dari {base_url} (total {total_pages} halaman)...")
         all_records: List[Dict[str, Any]] = []

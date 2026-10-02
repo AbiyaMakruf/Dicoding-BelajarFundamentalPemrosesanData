@@ -1,12 +1,3 @@
-"""
-Unit tests untuk modul utils/extract.py
-Menguji fungsi:
-- fetch_page
-- parse_product_card
-- scrape_page
-- extract_data
-"""
-
 import unittest
 from unittest.mock import MagicMock, patch
 from bs4 import BeautifulSoup
@@ -38,9 +29,6 @@ class TestExtract(unittest.TestCase):
         self.soup = BeautifulSoup(self.sample_card_html, "html.parser")
         self.card = self.soup.find("div", class_="collection-card")
 
-    # -----------------------------------------------------------------
-    # Test fetch_page
-    # -----------------------------------------------------------------
     @patch("requests.get")
     def test_fetch_page_success_without_session(self, mock_get):
         mock_response = MagicMock()
@@ -73,9 +61,6 @@ class TestExtract(unittest.TestCase):
         result = fetch_page("https://invalid-url.com")
         self.assertIsNone(result)
 
-    # -----------------------------------------------------------------
-    # Test parse_product_card
-    # -----------------------------------------------------------------
     def test_parse_product_card_valid(self):
         timestamp = "2026-10-02T10:00:00"
         result = parse_product_card(self.card, timestamp=timestamp)
@@ -130,9 +115,6 @@ class TestExtract(unittest.TestCase):
         result = parse_product_card(mock_broken_card)
         self.assertIsNone(result)
 
-    # -----------------------------------------------------------------
-    # Test scrape_page
-    # -----------------------------------------------------------------
     def test_scrape_page_invalid_page_number(self):
         result = scrape_page(0)
         self.assertEqual(result, [])
@@ -166,9 +148,6 @@ class TestExtract(unittest.TestCase):
         result = scrape_page(2)
         self.assertEqual(result, [])
 
-    # -----------------------------------------------------------------
-    # Test extract_data
-    # -----------------------------------------------------------------
     @patch("utils.extract.scrape_page")
     def test_extract_data_success(self, mock_scrape):
         mock_item = {

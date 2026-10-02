@@ -1,18 +1,9 @@
-"""
-Modul Load untuk ETL Pipeline Fashion Studio.
-Bertanggung jawab untuk menyimpan data yang telah ditransformasikan ke tiga jenis repositori:
-1. Flat file (CSV)
-2. Google Sheets via Google Sheets API (Service Account)
-3. Database Relasional PostgreSQL via SQLAlchemy & psycopg2
-"""
-
 import os
 import logging
 from typing import Any, Dict, Optional, Sequence
 import pandas as pd
 from sqlalchemy import create_engine
 
-# Import library Google API
 try:
     from google.oauth2.service_account import Credentials
     from googleapiclient.discovery import build
@@ -27,21 +18,10 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
 def load_to_csv(df: pd.DataFrame, output_path: str = "products.csv") -> str:
-    """
-    Menyimpan DataFrame ke dalam berkas flat file berformat CSV.
-
-    Args:
-        df: DataFrame yang telah dibersihkan.
-        output_path: Path lokasi penyimpanan file CSV (default: 'products.csv').
-
-    Returns:
-        Path file CSV yang berhasil disimpan.
-    """
     try:
         if df is None:
             raise ValueError("DataFrame tidak boleh bernilai None.")
 
-        # Buat direktori induk jika belum ada
         dir_name = os.path.dirname(output_path)
         if dir_name:
             os.makedirs(dir_name, exist_ok=True)
@@ -60,23 +40,10 @@ def load_to_google_sheets(
     service_account_path: str = "google-sheets-api.json",
     sheet_name: str = "Sheet1",
 ) -> bool:
-    """
-    Menyimpan DataFrame ke dalam Google Sheets menggunakan Google Sheets API dan Service Account.
-
-    Args:
-        df: DataFrame yang telah dibersihkan.
-        spreadsheet_id: ID Google Sheets (dapat diambil dari env SPREADSHEET_ID).
-        service_account_path: Path berkas kredensial service account JSON.
-        sheet_name: Nama worksheet target (default: 'Sheet1').
-
-    Returns:
-        True jika berhasil mengunggah data, False jika gagal.
-    """
     try:
         if df is None:
             raise ValueError("DataFrame tidak boleh bernilai None.")
 
-        # Ambil spreadsheet_id dari argumen atau environment variable
         target_spreadsheet_id = spreadsheet_id or os.getenv("SPREADSHEET_ID")
         if not target_spreadsheet_id:
             logger.warning("[Google Sheets] Spreadsheet ID tidak disediakan (argumen atau env SPREADSHEET_ID).")
@@ -89,14 +56,11 @@ def load_to_google_sheets(
         if Credentials is None or build is None:
             raise ImportError("Modul google-auth atau google-api-python-client belum terinstal.")
 
-        # Autentikasi menggunakan file service account
         credentials = Credentials.from_service_account_file(service_account_path, scopes=SCOPES)
         service = build("sheets", "v4", credentials=credentials)
         sheet = service.spreadsheets()
 
-        # Siapkan payload: baris header + baris nilai
         header = list(df.columns)
-        # Konversi NaN menjadi string kosong dan serialisasikan data
         cleaned_records = df.fillna("").values.tolist()
         values = [header] + cleaned_records
 
@@ -129,23 +93,10 @@ def load_to_postgres(
     table_name: str = "products",
     if_exists: str = "replace",
 ) -> bool:
-    """
-    Menyimpan DataFrame ke dalam tabel database PostgreSQL menggunakan SQLAlchemy.
-
-    Args:
-        df: DataFrame yang telah dibersihkan.
-        connection_string: URL koneksi PostgreSQL (misal: postgresql+psycopg2://user:pass@host:port/dbname).
-        table_name: Nama tabel tujuan di PostgreSQL (default: 'products').
-        if_exists: Penanganan tabel jika sudah ada ('replace', 'append', 'fail').
-
-    Returns:
-        True jika berhasil menyimpan data, False jika gagal.
-    """
     try:
         if df is None:
             raise ValueError("DataFrame tidak boleh bernilai None.")
 
-        # Ambil URL koneksi dari argumen atau environment variable
         db_url = connection_string or os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")
         if not db_url:
             db_user = os.getenv("POSTGRES_USER", "postgres")
@@ -175,24 +126,6 @@ def load_data(
     postgres_conn_string: Optional[str] = None,
     postgres_table: str = "products",
 ) -> Dict[str, Any]:
-    """
-    Fungsi orkestrasi untuk memuat data ke beberapa repositori data secara modular:
-    - Flat file CSV
-    - Google Sheets
-    - PostgreSQL
-
-    Args:
-        df: DataFrame produk bersih.
-        targets: Tuple/list target repositori yang diinginkan.
-        output_csv_path: Path tujuan berkas CSV.
-        spreadsheet_id: ID Google Sheets.
-        service_account_path: Path berkas kredensial service account.
-        postgres_conn_string: URL koneksi PostgreSQL.
-        postgres_table: Nama tabel database.
-
-    Returns:
-        Dictionary status pemuatan per repositori target.
-    """
     results: Dict[str, Any] = {}
     try:
         logger.info(f"Memulai proses pemuatan data (load) ke target: {targets}...")

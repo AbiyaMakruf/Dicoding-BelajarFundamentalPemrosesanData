@@ -1,17 +1,4 @@
-"""
-Unit tests untuk modul utils/transform.py
-Menguji fungsi:
-- clean_price
-- clean_rating
-- clean_colors
-- clean_size
-- clean_gender
-- filter_invalid_products
-- transform_data
-"""
-
 import unittest
-from unittest.mock import patch
 import pandas as pd
 import numpy as np
 
@@ -27,9 +14,6 @@ from utils.transform import (
 
 
 class TestTransform(unittest.TestCase):
-    # -----------------------------------------------------------------
-    # Test clean_price
-    # -----------------------------------------------------------------
     def test_clean_price_valid(self):
         result = clean_price("$100.00", exchange_rate=16000.0)
         self.assertEqual(result, 1600000.0)
@@ -59,9 +43,6 @@ class TestTransform(unittest.TestCase):
         result = clean_price(BrokenObj())
         self.assertIsNone(result)
 
-    # -----------------------------------------------------------------
-    # Test clean_rating
-    # -----------------------------------------------------------------
     def test_clean_rating_valid_decimal(self):
         result = clean_rating("Rating: ⭐ 3.9 / 5")
         self.assertEqual(result, 3.9)
@@ -88,9 +69,6 @@ class TestTransform(unittest.TestCase):
         result = clean_rating(BrokenObj())
         self.assertIsNone(result)
 
-    # -----------------------------------------------------------------
-    # Test clean_colors
-    # -----------------------------------------------------------------
     def test_clean_colors_plural(self):
         result = clean_colors("3 Colors")
         self.assertEqual(result, 3)
@@ -113,9 +91,6 @@ class TestTransform(unittest.TestCase):
         result = clean_colors(BrokenObj())
         self.assertIsNone(result)
 
-    # -----------------------------------------------------------------
-    # Test clean_size
-    # -----------------------------------------------------------------
     def test_clean_size_valid(self):
         self.assertEqual(clean_size("Size: M"), "M")
         self.assertEqual(clean_size("Size:  XXL "), "XXL")
@@ -136,9 +111,6 @@ class TestTransform(unittest.TestCase):
         result = clean_size(BrokenObj())
         self.assertIsNone(result)
 
-    # -----------------------------------------------------------------
-    # Test clean_gender
-    # -----------------------------------------------------------------
     def test_clean_gender_valid(self):
         self.assertEqual(clean_gender("Gender: Women"), "Women")
         self.assertEqual(clean_gender("Gender:  Unisex "), "Unisex")
@@ -159,9 +131,6 @@ class TestTransform(unittest.TestCase):
         result = clean_gender(BrokenObj())
         self.assertIsNone(result)
 
-    # -----------------------------------------------------------------
-    # Test filter_invalid_products
-    # -----------------------------------------------------------------
     def test_filter_invalid_products(self):
         data = {
             "Title": ["T-shirt 1", "Unknown Product", "unknown product", "Jacket 2", None, ""],
@@ -181,21 +150,17 @@ class TestTransform(unittest.TestCase):
         self.assertEqual(len(filter_invalid_products(no_title_df)), 1)
 
     def test_filter_invalid_products_exception(self):
-        # Pass an object that causes an error in dataframe operations
         result = filter_invalid_products(None)
         self.assertIsNone(result)
 
-    # -----------------------------------------------------------------
-    # Test transform_data
-    # -----------------------------------------------------------------
     def test_transform_data_pipeline_success(self):
         sample_data = {
             "Title": [
-                "Unknown Product",  # Harus difilter
+                "Unknown Product",
                 "T-shirt 2",
                 "Hoodie 3",
-                "Pants 16",  # Price unavailable -> harus di-drop karena null
-                "T-shirt 2",  # Duplikat persis -> harus di-drop
+                "Pants 16",
+                "T-shirt 2",
             ],
             "Price": ["$100.00", "$100.00", "$200.00", "Price Unavailable", "$100.00"],
             "Rating": [
@@ -219,30 +184,17 @@ class TestTransform(unittest.TestCase):
         df_raw = pd.DataFrame(sample_data)
         clean_df = transform_data(df_raw, exchange_rate=16000.0)
 
-        # Expected: only 2 rows remain (T-shirt 2 and Hoodie 3)
         self.assertEqual(len(clean_df), 2)
-
-        # Cek kolom Price (float, Rupiah)
         self.assertEqual(clean_df.loc[0, "Price"], 1600000.0)
         self.assertIsInstance(clean_df["Price"].iloc[0], (float, np.floating))
-
-        # Cek kolom Rating (float murni)
         self.assertEqual(clean_df.loc[0, "Rating"], 3.9)
         self.assertEqual(clean_df.loc[1, "Rating"], 4.8)
         self.assertIsInstance(clean_df["Rating"].iloc[0], (float, np.floating))
-
-        # Cek kolom Colors (int murni)
         self.assertEqual(clean_df.loc[0, "Colors"], 3)
         self.assertIsInstance(clean_df["Colors"].iloc[0], (int, np.integer))
-
-        # Cek kolom Size dan Gender (string bersih tanpa awalan)
         self.assertEqual(clean_df.loc[0, "Size"], "M")
         self.assertEqual(clean_df.loc[0, "Gender"], "Women")
-
-        # Cek timestamp
         self.assertEqual(clean_df.loc[0, "timestamp"], "2026-10-02T10:00:00")
-
-        # Pastikan tidak ada null dan tidak ada duplikat
         self.assertEqual(clean_df.isnull().sum().sum(), 0)
         self.assertEqual(clean_df.duplicated().sum(), 0)
 
@@ -254,7 +206,6 @@ class TestTransform(unittest.TestCase):
         self.assertListEqual(list(result.columns), expected_cols)
 
     def test_transform_data_exception(self):
-        # Passing an invalid input to trigger top-level try-except
         result = transform_data(None)
         self.assertTrue(result.empty)
         expected_cols = ["Title", "Price", "Rating", "Colors", "Size", "Gender", "timestamp"]
