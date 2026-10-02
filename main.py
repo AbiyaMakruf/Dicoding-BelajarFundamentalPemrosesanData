@@ -29,6 +29,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger("ETL_Pipeline")
 
+DEFAULT_SPREADSHEET_ID = "1X683BhBBnKemrD-P5opO4g0QPMybhZqtGPEbBSHoPjI"
+
+
+def get_spreadsheet_id_from_submission(file_path: str = "submission.txt") -> str | None:
+    """Membaca spreadsheet ID dari berkas submission.txt jika tersedia."""
+    try:
+        if os.path.exists(file_path):
+            import re
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            match = re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", content)
+            if match:
+                return match.group(1)
+    except Exception as exc:
+        logger.warning(f"Tidak dapat membaca spreadsheet ID dari {file_path}: {exc}")
+    return DEFAULT_SPREADSHEET_ID
+
 
 def run_pipeline(
     base_url: str = "https://fashion-studio.dicoding.dev",
@@ -102,7 +119,7 @@ def run_pipeline(
         load_targets = ["csv"]
 
         # Tentukan target repositori tambahan berdasarkan ketersediaan konfigurasi
-        target_sheet_id = spreadsheet_id or os.getenv("SPREADSHEET_ID")
+        target_sheet_id = spreadsheet_id or os.getenv("SPREADSHEET_ID") or get_spreadsheet_id_from_submission()
         if target_sheet_id and os.path.exists(service_account_path):
             load_targets.append("google_sheets")
         elif target_sheet_id:

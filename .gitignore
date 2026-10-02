@@ -16,6 +16,10 @@ ENV/
 .coverage.*
 htmlcov/
 
+# Google API Credentials (kept locally for Dicoding submission ZIP)
+google-sheets-api.json
+.env
+
 # Local IDE & OS
 .vscode/
 .idea/
